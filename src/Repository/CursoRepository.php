@@ -16,6 +16,21 @@ class CursoRepository extends ServiceEntityRepository
         parent::__construct($registry, Curso::class);
     }
 
+
+    public function add(Curso $curso):void
+    {
+        $this->getEntityManager()->persist($curso);
+        $this->getEntityManager()->flush();
+    }
+
+
+    public function remove(Curso $curso):void
+    {
+            $this->getEntityManager()->remove($curso);
+            $this->getEntityManager()->flush();
+    }
+
+
     //    /**
     //     * @return Curso[] Returns an array of Curso objects
     //     */

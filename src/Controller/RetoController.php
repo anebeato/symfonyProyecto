@@ -4,12 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Curso;
 use App\Entity\Usuario;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
+use App\Repository\CursoRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
 class RetoController extends AbstractController
 {
@@ -32,29 +33,17 @@ class RetoController extends AbstractController
 
 
     #[Route('/addCurso', name: 'add_curso', methods: ['POST'])]
-    public function addCurso(Request $request, CursoRepository $cursoRepository, SerializerInterface $serializer): JsonResponse
+    public function addCurso(Request $request, CursoRepository $cursoRepository): Response
     {
         $data = json_decode($request->getContent(), true);
-        $nombre = $data['nombre'] ?? null;
-
-
-        dump($data);
-        dump($nombre);
-
-        if (!$nombre) {
-            return $this->json(['error' => 'Nombre es requerido'], 400);
-        }
-
         $curso = new Curso();
-        $curso->setNombre($nombre);
+        $curso->setNombre($data['nombre']);
 
-        $cursoRepository->add($curso);
 
-        $data = $serializer->serialize($curso, 'json', ['groups' => 'curso:read']);
+        $cursoRepository->add($curso); 
 
-        error_log('Datos añadidos: ' . $data);
 
-        return new JsonResponse($data, 201, [], true);
+        return $this->json(['status' => 'Curso created!'], Response::HTTP_CREATED);
     }
 
     #[Route('/login', name: 'login', methods: ['POST'])]
