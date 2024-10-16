@@ -22,7 +22,7 @@ class RetoController extends AbstractController
         ]);
     }
 
-    #[Route('/cursos', name: 'app_reto')]
+    #[Route('/cursos', name: 'app_cursos', methods: ['GET'])]
     public function getCursos(EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
         $cursos = $entityManager->getRepository(Curso::class)->findAll();
@@ -30,14 +30,31 @@ class RetoController extends AbstractController
         return new JsonResponse($data, 200, [], true);
     }
 
-    #[Route('/addCursos', name: 'add_cursos', methods: ['POST'])]
-    public function addCursos(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+
+    #[Route('/addCurso', name: 'add_curso', methods: ['POST'])]
+    public function addCurso(Request $request, CursoRepository $cursoRepository, SerializerInterface $serializer): JsonResponse
     {
-        $data = $request->getContent();
-        $curso = $serializer->deserialize($data, Curso::class, 'json');
-        $entityManager->persist($curso);
-        $entityManager->flush();
-        return $this->json(['status' => 'Curso added!'], 201);
+        $data = json_decode($request->getContent(), true);
+        $nombre = $data['nombre'] ?? null;
+
+
+        dump($data);
+        dump($nombre);
+
+        if (!$nombre) {
+            return $this->json(['error' => 'Nombre es requerido'], 400);
+        }
+
+        $curso = new Curso();
+        $curso->setNombre($nombre);
+
+        $cursoRepository->add($curso);
+
+        $data = $serializer->serialize($curso, 'json', ['groups' => 'curso:read']);
+
+        error_log('Datos añadidos: ' . $data);
+
+        return new JsonResponse($data, 201, [], true);
     }
 
     #[Route('/login', name: 'login', methods: ['POST'])]
