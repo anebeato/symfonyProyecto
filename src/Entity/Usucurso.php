@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UsucursoRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UsucursoRepository::class)]
 class Usucurso
@@ -11,17 +12,21 @@ class Usucurso
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Usucurso'])]
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['Usucurso'])]
     private ?int $nota = null;
 
     #[ORM\ManyToOne(inversedBy: 'usucursos')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['Usucurso'])]
     private ?Curso $id_curso = null;
 
     #[ORM\ManyToOne(inversedBy: 'usucursos')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['Usucurso'])]
     private ?Usuario $id_usuario = null;
 
     public function getId(): ?int
