@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\CursoRepository;
 use App\Repository\UsuarioRepository;
+use App\Repository\UsucursoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -156,5 +157,25 @@ class RetoController extends AbstractController
         }
         $data = $serializer->serialize($usuario, 'json');
         return new JsonResponse($data, 200, [], true);
+    }
+
+    #[Route('/getcursonota/{id}', name: 'get_curso_nota', methods: ['GET'])]
+    public function getcursonota(int $id, UsucursoRepository $usucursoRepository): JsonResponse
+    {
+        $usucursos = $usucursoRepository->findBy(['id_usuario' => $id]);
+
+        if (!$usucursos) {
+            return $this->json(['message' => 'No courses found for the given student ID'], Response::HTTP_NOT_FOUND);
+        }
+
+        $cursosNotas = [];
+        foreach ($usucursos as $usucurso) {
+            $cursosNotas[] = [
+                'curso' => $usucurso->getIdCurso()->getNombre(),
+                'nota' => $usucurso->getNota(),
+            ];
+        }
+
+        return $this->json($cursosNotas);
     }
 }
