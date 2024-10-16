@@ -100,6 +100,18 @@ class RetoController extends AbstractController
         return $this->json(['status' => 'Nota added!'], 201);
     }
 
+    #[Route('/deleteNota/{id}', name: 'delete_nota', methods: ['DELETE'])]
+    public function deleteNota(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $usucurso = $entityManager->getRepository(Usucurso::class)->find($id);
+        if (!$usucurso) {
+            return $this->json(['status' => 'Nota not found!'], 404);
+        }
+        $entityManager->remove($usucurso);
+        $entityManager->flush();
+        return $this->json(['status' => 'Nota deleted!'], 200);
+    }
+
     #[Route('/getAlumno/{id}', name: 'get_alumno', methods: ['GET'])]
     public function getAlumno(int $id, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
