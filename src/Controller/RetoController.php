@@ -66,17 +66,7 @@ class RetoController extends AbstractController
         return $this->json(['status' => 'Curso created!'], Response::HTTP_CREATED);
     }
 
-    #[Route('/login', name: 'login', methods: ['POST'])]
-    public function login(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
-    {
-        $data = $request->getContent();
-        $credentials = $serializer->deserialize($data, 'array', 'json');
-        $usuario = $entityManager->getRepository(Usuario::class)->findOneBy(['username' => $credentials['username']]);
-        if (!$usuario || !password_verify($credentials['password'], $usuario->getPassword())) {
-            return $this->json(['status' => 'Invalid credentials!'], 401);
-        }
-        return $this->json(['status' => 'Login successful!']);
-    }
+
 
 
     #[Route('/addNota', name: 'add_nota', methods: ['POST'])]
