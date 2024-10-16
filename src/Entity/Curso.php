@@ -26,6 +26,9 @@ class Curso
     #[ORM\ManyToMany(targetEntity: Usuario::class, mappedBy: 'id_curso_usuario')]
     private Collection $nota;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $nota = null;
+
     public function __construct()
     {
         $this->nota = new ArrayCollection();
@@ -56,11 +59,11 @@ class Curso
         return $this->nota;
     }
 
-    public function addNotum(Usuario $notum): static
+    public function addNotum(Usuario $notum, ?float $nota = null): static
     {
         if (!$this->nota->contains($notum)) {
             $this->nota->add($notum);
-            $notum->addIdCursoUsuario($this);
+            $notum->addIdCursoUsuario($this, $nota);
         }
 
         return $this;
@@ -71,6 +74,18 @@ class Curso
         if ($this->nota->removeElement($notum)) {
             $notum->removeIdCursoUsuario($this);
         }
+
+        return $this;
+    }
+
+    public function getNotaValue(): ?float
+    {
+        return $this->nota;
+    }
+
+    public function setNotaValue(?float $nota): static
+    {
+        $this->nota = $nota;
 
         return $this;
     }

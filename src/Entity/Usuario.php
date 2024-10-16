@@ -36,6 +36,9 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Curso::class, inversedBy: 'nota')]
     private Collection $id_curso_usuario;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $nota = null;
+
     public function __construct()
     {
         $this->id_curso_usuario = new ArrayCollection();
@@ -102,10 +105,11 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id_curso_usuario;
     }
 
-    public function addIdCursoUsuario(Curso $idCursoUsuario): static
+    public function addIdCursoUsuario(Curso $idCursoUsuario, ?float $nota = null): static
     {
         if (!$this->id_curso_usuario->contains($idCursoUsuario)) {
             $this->id_curso_usuario->add($idCursoUsuario);
+            $this->nota = $nota;
         }
 
         return $this;
@@ -113,7 +117,21 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeIdCursoUsuario(Curso $idCursoUsuario): static
     {
-        $this->id_curso_usuario->removeElement($idCursoUsuario);
+        if ($this->id_curso_usuario->removeElement($idCursoUsuario)) {
+            $this->nota = null;
+        }
+
+        return $this;
+    }
+
+    public function getNota(): ?float
+    {
+        return $this->nota;
+    }
+
+    public function setNota(?float $nota): static
+    {
+        $this->nota = $nota;
 
         return $this;
     }

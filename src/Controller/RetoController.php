@@ -87,7 +87,10 @@ class RetoController extends AbstractController
         if (!$usuario || !$curso) {
             return $this->json(['status' => 'Usuario or Curso not found!'], 404);
         }
-        $usuario->addIdCursoUsuario($curso);
+        if (!isset($notaData['nota'])) {
+            return $this->json(['status' => 'Nota not provided!'], 400);
+        }
+        $usuario->addIdCursoUsuario($curso, $notaData['nota']);
         $entityManager->persist($usuario);
         $entityManager->flush();
         return $this->json(['status' => 'Nota added!'], 201);
