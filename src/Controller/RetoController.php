@@ -81,7 +81,7 @@ class RetoController extends AbstractController
     public function addNota(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
         $data = $request->getContent();
-        $notaData = $serializer->deserialize($data, 'array', 'json');
+        $notaData = json_decode($data, true);
         $usuario = $entityManager->getRepository(Usuario::class)->find($notaData['usuario_id']);
         $curso = $entityManager->getRepository(Curso::class)->find($notaData['curso_id']);
         if (!$usuario || !$curso) {
