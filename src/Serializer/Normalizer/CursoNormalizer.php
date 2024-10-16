@@ -3,10 +3,10 @@
 namespace App\Serializer\Normalizer;
 
 use App\Entity\Curso;
-use Symfony\Component\Serializer\Normalizer\ContextAwareNormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\ContextAwareDenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-class CursoNormalizer implements ContextAwareNormalizerInterface, ContextAwareDenormalizerInterface
+class CursoNormalizer implements NormalizerInterface, DenormalizerInterface
 {
     public function normalize($object, $format = null, array $context = [])
     {
