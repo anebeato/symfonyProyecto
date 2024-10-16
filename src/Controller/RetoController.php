@@ -185,4 +185,22 @@ class RetoController extends AbstractController
         $data = $serializer->serialize($userObjects, 'json', [AbstractNormalizer::ATTRIBUTES => ['id', 'username', 'admin', 'foto'], AbstractNormalizer::GROUPS => ['Usuario']]);
         return new JsonResponse($data, 200, [], true);
     }
+
+    #[Route('/login', name: 'login', methods: ['POST'])]
+    public function login(Request $request, UsuarioRepository $usuarioRepository, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['username'], $data['password'])) {
+            return $this->json(['status' => 'Invalid data!'], 400);
+        }
+
+        $usuario = $usuarioRepository->findOneBy(['username' => $data['username']]);
+
+        if (!$usuario || !$passwordHasher->isPasswordValid($usuario, $data['password'])) {
+            return $this->json(['status' => 'Invalid credentials!'], 401);
+        }
+
+        return $this->json(['status' => 'Login successful!'], 200);
+    }
 }
