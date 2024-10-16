@@ -20,10 +20,10 @@ class UsucursoRepository extends ServiceEntityRepository
     public function findUsersByCursoId(int $cursoId): array
     {
         return $this->createQueryBuilder('u')
-            ->addSelect('usuario')
-            ->join('u.id_usuario', 'usuario')
-           // ->andWhere('u.id_curso = :cursoId')
-           // ->setParameter('cursoId', $cursoId)
+            ->addSelect('usua')
+            ->join('u.id_usuario', 'usua')
+            ->andWhere('u.id_curso = :cursoId')
+            ->setParameter('cursoId', $cursoId)
             ->getQuery()
             ->getResult();
 
