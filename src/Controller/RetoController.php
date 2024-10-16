@@ -188,7 +188,7 @@ class RetoController extends AbstractController
             return $this->json(['message' => 'No users found for the given course ID'], Response::HTTP_NOT_FOUND);
         }
 
-        $data = $serializer->serialize($usuarios, 'json', [AbstractNormalizer::ATTRIBUTES => ['id', 'username', 'admin', 'foto']]);
+        $data = $serializer->serialize($usuarios, 'json', [AbstractNormalizer::ATTRIBUTES => ['id', 'username', 'admin', 'foto'], AbstractNormalizer::GROUPS => ['Usuario']]);
         return new JsonResponse($data, 200, [], true);
     }
 }
