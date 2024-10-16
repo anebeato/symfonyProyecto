@@ -21,7 +21,7 @@ class Usuario
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private ?bool $admin = null;
 
     #[ORM\Column(length: 255, nullable: true)]

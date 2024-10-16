@@ -13,7 +13,7 @@ use App\Repository\CursoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class RetoController extends AbstractController
 {
@@ -92,6 +92,40 @@ class RetoController extends AbstractController
 
     #[Route('/getAlumno/{id}', name: 'get_alumno', methods: ['GET'])]
     public function getAlumno(int $id, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+    {
+        $usuario = $entityManager->getRepository(Usuario::class)->find($id);
+        if (!$usuario) {
+            return $this->json(['status' => 'Usuario not found!'], 404);
+        }
+        $data = $serializer->serialize($usuario, 'json');
+        return new JsonResponse($data, 200, [], true);
+    }
+
+    #[Route('/addUsuario', name: 'add_usuario', methods: ['POST'])]
+    public function addUsuario(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['username'], $data['password'], $data['admin'])) {
+            return $this->json(['status' => 'Invalid data!'], 400);
+        }
+
+        $usuario = new Usuario();
+        $usuario->setUsername($data['username']);
+        $usuario->setPassword($passwordHasher->hashPassword($usuario, $data['password']));
+        $usuario->setAdmin((bool)$data['admin']);
+        if (isset($data['foto'])) {
+            $usuario->setFoto($data['foto']);
+        }
+
+        $entityManager->persist($usuario);
+        $entityManager->flush();
+
+        return $this->json(['status' => 'Usuario created!'], 201);
+    }
+
+    #[Route('/getUsuario/{id}', name: 'get_usuario', methods: ['GET'])]
+    public function getUsuario(int $id, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
         $usuario = $entityManager->getRepository(Usuario::class)->find($id);
         if (!$usuario) {
