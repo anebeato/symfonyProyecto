@@ -26,17 +26,26 @@ class RetoController extends AbstractController
         ]);
     }
 
-    #[Route('/cursos', name: 'get_cursos', methods: ['GET'])]
-    public function getCursos(CursoRepository $cursoRepository, SerializerInterface $serializer): JsonResponse
+    #[Route('/cursos', name: 'app_curso', methods: ['GET'])]
+    public function getCursos(CursoRepository $cursoRepository): Response
     {
         $cursos = $cursoRepository->findAll();
 
-        $data = $serializer->serialize($cursos, 'json', [
-            'groups' => 'curso:read',
-            AbstractNormalizer::IGNORED_ATTRIBUTES => ['curso']
-        ]);
-        return new JsonResponse($data, 200, [], true);
+        if (!$cursos) {
+            return $this->json(['message' => 'No courses found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $cursosArray = [];
+        foreach ($cursos as $curso) {
+            $cursosArray[] = [
+                'id' => $curso->getId(),
+                'nombre' => $curso->getNombre(),
+            ];
+        }
+
+        return $this->json($cursosArray);
     }
+
 
     #[Route('/addCurso', name: 'add_curso', methods: ['POST'])]
     public function addCurso(Request $request, CursoRepository $cursoRepository): Response
@@ -64,16 +73,6 @@ class RetoController extends AbstractController
         return $this->json(['status' => 'Login successful!']);
     }
 
-    #[Route('/addAlumno', name: 'add_alumno', methods: ['POST'])]
-    public function addAlumno(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
-    {
-        $data = $request->getContent();
-        $usuario = $serializer->deserialize($data, Usuario::class, 'json');
-        $usuario->setPassword(password_hash($usuario->getPassword(), PASSWORD_BCRYPT));
-        $entityManager->persist($usuario);
-        $entityManager->flush();
-        return $this->json(['status' => 'Alumno added!'], 201);
-    }
 
     #[Route('/addNota', name: 'add_nota', methods: ['POST'])]
     public function addNota(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
