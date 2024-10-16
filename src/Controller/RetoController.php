@@ -11,6 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\CursoRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+
 
 class RetoController extends AbstractController
 {
@@ -23,14 +26,17 @@ class RetoController extends AbstractController
         ]);
     }
 
-    #[Route('/cursos', name: 'app_cursos', methods: ['GET'])]
-    public function getCursos(EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+    #[Route('/cursos', name: 'get_cursos', methods: ['GET'])]
+    public function getCursos(CursoRepository $cursoRepository, SerializerInterface $serializer): JsonResponse
     {
-        $cursos = $entityManager->getRepository(Curso::class)->findAll();
-        $data = $serializer->serialize($cursos, 'json');
+        $cursos = $cursoRepository->findAll();
+
+        $data = $serializer->serialize($cursos, 'json', [
+            'groups' => 'curso:read',
+            AbstractNormalizer::IGNORED_ATTRIBUTES => ['curso']
+        ]);
         return new JsonResponse($data, 200, [], true);
     }
-
 
     #[Route('/addCurso', name: 'add_curso', methods: ['POST'])]
     public function addCurso(Request $request, CursoRepository $cursoRepository): Response
