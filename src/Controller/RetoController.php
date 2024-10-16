@@ -193,7 +193,7 @@ class RetoController extends AbstractController
             $usuarios[] = $usucurso->getIdUsuario();
         }
 
-        $data = $serializer->serialize($usuarios, 'json');
+        $data = $serializer->serialize($usuarios, 'json', [AbstractNormalizer::GROUPS => ['user']]);
         return new JsonResponse($data, 200, [], true);
     }
 }
