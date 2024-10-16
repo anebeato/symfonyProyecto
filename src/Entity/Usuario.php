@@ -6,6 +6,7 @@ use App\Repository\UsuarioRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UsuarioRepository::class)]
 class Usuario
@@ -13,18 +14,22 @@ class Usuario
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Usuario'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['Usuario'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
     #[ORM\Column]
+    #[Groups(['Usuario'])]
     private ?bool $admin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['Usuario'])]
     private ?string $foto = null;
 
     /**
