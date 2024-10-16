@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Curso;
 use App\Entity\Usuario;
+use App\Entity\Usucurso;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -90,8 +91,11 @@ class RetoController extends AbstractController
         if (!isset($notaData['nota'])) {
             return $this->json(['status' => 'Nota not provided!'], 400);
         }
-        $usuario->addIdCursoUsuario($curso, $notaData['nota']);
-        $entityManager->persist($usuario);
+        $usucurso = new Usucurso();
+        $usucurso->setIdUsuario($usuario);
+        $usucurso->setIdCurso($curso);
+        $usucurso->setNota($notaData['nota']);
+        $entityManager->persist($usucurso);
         $entityManager->flush();
         return $this->json(['status' => 'Nota added!'], 201);
     }
