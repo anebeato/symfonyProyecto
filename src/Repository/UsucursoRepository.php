@@ -16,6 +16,15 @@ class UsucursoRepository extends ServiceEntityRepository
         parent::__construct($registry, Usucurso::class);
     }
 
+    public function findUsersByCursoId(int $cursoId): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.id_curso = :cursoId')
+            ->setParameter('cursoId', $cursoId)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Usucurso[] Returns an array of Usucurso objects
     //     */
