@@ -2,34 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\Usuario;
+use App\Entity\Usucurso;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Usuario>
+ * @extends ServiceEntityRepository<Usucurso>
  */
-class UsuarioRepository extends ServiceEntityRepository
+class UsucursoRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Usuario::class);
-    }
-
-    public function add(Usuario $usuario): void
-    {
-        $this->getEntityManager()->persist($usuario);
-        $this->getEntityManager()->flush();
-    }
-
-    public function remove(Usuario $usuario): void
-    {
-        $this->getEntityManager()->remove($usuario);
-        $this->getEntityManager()->flush();
+        parent::__construct($registry, Usucurso::class);
     }
 
     //    /**
-    //     * @return Usuario[] Returns an array of Usuario objects
+    //     * @return Usucurso[] Returns an array of Usucurso objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -43,7 +31,7 @@ class UsuarioRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Usuario
+    //    public function findOneBySomeField($value): ?Usucurso
     //    {
     //        return $this->createQueryBuilder('u')
     //            ->andWhere('u.exampleField = :val')

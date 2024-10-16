@@ -5,8 +5,6 @@ namespace App\Entity;
 use App\Repository\CursoRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Symfony\Component\Serializer\Annotation\Groups;
-
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CursoRepository::class)]
@@ -21,17 +19,14 @@ class Curso
     private ?string $nombre = null;
 
     /**
-     * @var Collection<int, Usuario>
+     * @var Collection<int, Usucurso>
      */
-    #[ORM\ManyToMany(targetEntity: Usuario::class, mappedBy: 'id_curso_usuario')]
-    private Collection $nota;
-
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $nota = null;
+    #[ORM\OneToMany(targetEntity: Usucurso::class, mappedBy: 'id_curso')]
+    private Collection $usucursos;
 
     public function __construct()
     {
-        $this->nota = new ArrayCollection();
+        $this->usucursos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -52,40 +47,31 @@ class Curso
     }
 
     /**
-     * @return Collection<int, Usuario>
+     * @return Collection<int, Usucurso>
      */
-    public function getNota(): Collection
+    public function getUsucursos(): Collection
     {
-        return $this->nota;
+        return $this->usucursos;
     }
 
-    public function addNotum(Usuario $notum, ?float $nota = null): static
+    public function addUsucurso(Usucurso $usucurso): static
     {
-        if (!$this->nota->contains($notum)) {
-            $this->nota->add($notum);
-            $notum->addIdCursoUsuario($this, $nota);
+        if (!$this->usucursos->contains($usucurso)) {
+            $this->usucursos->add($usucurso);
+            $usucurso->setIdCurso($this);
         }
 
         return $this;
     }
 
-    public function removeNotum(Usuario $notum): static
+    public function removeUsucurso(Usucurso $usucurso): static
     {
-        if ($this->nota->removeElement($notum)) {
-            $notum->removeIdCursoUsuario($this);
+        if ($this->usucursos->removeElement($usucurso)) {
+            // set the owning side to null (unless already changed)
+            if ($usucurso->getIdCurso() === $this) {
+                $usucurso->setIdCurso(null);
+            }
         }
-
-        return $this;
-    }
-
-    public function getNotaValue(): ?float
-    {
-        return $this->nota;
-    }
-
-    public function setNotaValue(?float $nota): static
-    {
-        $this->nota = $nota;
 
         return $this;
     }

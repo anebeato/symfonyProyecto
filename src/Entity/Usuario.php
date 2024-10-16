@@ -1,5 +1,4 @@
 <?php
-// src/Entity/Usuario.php
 
 namespace App\Entity;
 
@@ -7,11 +6,9 @@ use App\Repository\UsuarioRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UsuarioRepository::class)]
-class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
+class Usuario
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -24,24 +21,21 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column(type: 'boolean')]
+    #[ORM\Column]
     private ?bool $admin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $foto = null;
 
     /**
-     * @var Collection<int, Curso>
+     * @var Collection<int, Usucurso>
      */
-    #[ORM\ManyToMany(targetEntity: Curso::class, inversedBy: 'nota')]
-    private Collection $id_curso_usuario;
-
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $nota = null;
+    #[ORM\OneToMany(targetEntity: Usucurso::class, mappedBy: 'id_usuario')]
+    private Collection $usucursos;
 
     public function __construct()
     {
-        $this->id_curso_usuario = new ArrayCollection();
+        $this->usucursos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -98,62 +92,32 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Curso>
+     * @return Collection<int, Usucurso>
      */
-    public function getIdCursoUsuario(): Collection
+    public function getUsucursos(): Collection
     {
-        return $this->id_curso_usuario;
+        return $this->usucursos;
     }
 
-    public function addIdCursoUsuario(Curso $idCursoUsuario, ?float $nota = null): static
+    public function addUsucurso(Usucurso $usucurso): static
     {
-        if (!$this->id_curso_usuario->contains($idCursoUsuario)) {
-            $this->id_curso_usuario->add($idCursoUsuario);
-            $this->nota = $nota;
+        if (!$this->usucursos->contains($usucurso)) {
+            $this->usucursos->add($usucurso);
+            $usucurso->setIdUsuario($this);
         }
 
         return $this;
     }
 
-    public function removeIdCursoUsuario(Curso $idCursoUsuario): static
+    public function removeUsucurso(Usucurso $usucurso): static
     {
-        if ($this->id_curso_usuario->removeElement($idCursoUsuario)) {
-            $this->nota = null;
+        if ($this->usucursos->removeElement($usucurso)) {
+            // set the owning side to null (unless already changed)
+            if ($usucurso->getIdUsuario() === $this) {
+                $usucurso->setIdUsuario(null);
+            }
         }
 
         return $this;
-    }
-
-    public function getNota(): ?float
-    {
-        return $this->nota;
-    }
-
-    public function setNota(?float $nota): static
-    {
-        $this->nota = $nota;
-
-        return $this;
-    }
-
-    // Métodos requeridos por UserInterface
-    public function getRoles(): array
-    {
-        return ['ROLE_USER'];
-    }
-
-    public function getSalt(): ?string
-    {
-        return null;
-    }
-
-    public function eraseCredentials(): void
-    {
-        // Si tienes datos temporales sensibles en el usuario, bórralos aquí
-    }
-
-    public function getUserIdentifier(): string
-    {
-        return $this->username;
     }
 }

@@ -23,11 +23,10 @@ class CursoRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-
     public function remove(Curso $curso):void
     {
-            $this->getEntityManager()->remove($curso);
-            $this->getEntityManager()->flush();
+        $this->getEntityManager()->remove($curso);
+        $this->getEntityManager()->flush();
     }
 
 
