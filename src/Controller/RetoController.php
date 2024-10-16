@@ -182,15 +182,10 @@ class RetoController extends AbstractController
     #[Route('/getUsersByCurso/{id}', name: 'get_users_by_curso', methods: ['GET'])]
     public function getUsersByCurso(int $id, UsucursoRepository $usucursoRepository, SerializerInterface $serializer): JsonResponse
     {
-        $usucursos = $usucursoRepository->findBy(['id_curso' => $id]);
+        $usuarios = $usucursoRepository->findUsersByCursoId($id);
 
-        if (!$usucursos) {
+        if (!$usuarios) {
             return $this->json(['message' => 'No users found for the given course ID'], Response::HTTP_NOT_FOUND);
-        }
-
-        $usuarios = [];
-        foreach ($usucursos as $usucurso) {
-            $usuarios[] = $usucurso->getIdUsuario();
         }
 
         $data = $serializer->serialize($usuarios, 'json', [AbstractNormalizer::GROUPS => ['user']]);
