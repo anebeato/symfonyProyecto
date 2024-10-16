@@ -1,4 +1,5 @@
 <?php
+// src/Entity/Usuario.php
 
 namespace App\Entity;
 
@@ -6,9 +7,11 @@ use App\Repository\UsuarioRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UsuarioRepository::class)]
-class Usuario
+class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -113,5 +116,26 @@ class Usuario
         $this->id_curso_usuario->removeElement($idCursoUsuario);
 
         return $this;
+    }
+
+    // Métodos requeridos por UserInterface
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Si tienes datos temporales sensibles en el usuario, bórralos aquí
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->username;
     }
 }

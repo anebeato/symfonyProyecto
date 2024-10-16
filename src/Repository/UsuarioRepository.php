@@ -16,6 +16,12 @@ class UsuarioRepository extends ServiceEntityRepository
         parent::__construct($registry, Usuario::class);
     }
 
+    public function add(Usuario $usuario):void
+    {
+        $this->getEntityManager()->persist($usuario);
+        $this->getEntityManager()->flush();
+    }
+
     //    /**
     //     * @return Usuario[] Returns an array of Usuario objects
     //     */
