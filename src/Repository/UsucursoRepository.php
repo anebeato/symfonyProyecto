@@ -26,16 +26,23 @@ class UsucursoRepository extends ServiceEntityRepository
             ->setParameter('cursoId', $cursoId)
             ->getQuery()
             ->getResult();
+    }
 
-            /*return $this->createQueryBuilder('p')
-            ->addSelect('c')
-            ->leftJoin('p.comments', 'c')
-            ->orderBy('p.created', 'DESC')
+    public function add(Usucurso $usucurso): void
+    {
+        $this->getEntityManager()->persist($usucurso);
+        $this->getEntityManager()->flush();
+    }
+
+    public function findOneByUsuarioAndCurso(int $usuarioId, int $cursoId): ?Usucurso
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.id_usuario = :usuarioId')
+            ->andWhere('u.id_curso = :cursoId')
+            ->setParameter('usuarioId', $usuarioId)
+            ->setParameter('cursoId', $cursoId)
             ->getQuery()
-            ->getResult();*/
-
-
-
+            ->getOneOrNullResult();
     }
 
     //    /**

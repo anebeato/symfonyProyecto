@@ -198,9 +198,50 @@ class RetoController extends AbstractController
         $usuario = $usuarioRepository->findOneBy(['username' => $data['username']]);
 
         if (!$usuario || !$passwordHasher->isPasswordValid($usuario, $data['password'])) {
-            return $this->json(['status' => 'Invalid credentials!'], 401);
+            return $this->json(['login' => 'false'], 401);
         }
 
-        return $this->json(['status' => 'Login successful!'], 200);
+        return $this->json([
+            'login' => 'true',
+            'userId' => $usuario->getId(),
+            'admin' => $usuario->isAdmin()
+        ], 200);
+    }
+
+    #[Route('/altaAlumno', name: 'alta_alumno', methods: ['POST'])]
+    public function altaAlumno(Request $request, UsuarioRepository $usuarioRepository, UsucursoRepository $usucursoRepository, CursoRepository $cursoRepository, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['username'], $data['curso_id'])) {
+            return $this->json(['status' => 'Invalid data!'], 400);
+        }
+
+        $usuario = $usuarioRepository->findOneBy(['username' => $data['username']]);
+
+        if (!$usuario) {
+            $usuario = new Usuario();
+            $usuario->setUsername($data['username']);
+            $usuario->setPassword($passwordHasher->hashPassword($usuario, 'Almi123'));
+            $usuario->setAdmin(false);
+            $usuarioRepository->add($usuario);
+        }
+
+        $curso = $cursoRepository->find($data['curso_id']);
+        if (!$curso) {
+            return $this->json(['status' => 'Curso not found!'], 404);
+        }
+
+        $existingUsucurso = $usucursoRepository->findOneBy(['id_usuario' => $usuario->getId(), 'id_curso' => $curso->getId()]);
+        if ($existingUsucurso) {
+            return $this->json(['status' => 'Error: Usuario ya existe una relación con este curso!'], 400);
+        }
+
+        $usucurso = new Usucurso();
+        $usucurso->setIdUsuario($usuario);
+        $usucurso->setIdCurso($curso);
+        $usucursoRepository->add($usucurso);
+
+        return $this->json(['status' => 'Alumno added to curso!'], 201);
     }
 }
