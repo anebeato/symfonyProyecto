@@ -244,4 +244,81 @@ class RetoController extends AbstractController
 
         return $this->json(['status' => 'Alumno added to curso!'], 201);
     }
+
+    #[Route('/changePassword/{id}', name: 'change_password', methods: ['PUT'])]
+    public function changePassword(
+        int $id, 
+        Request $request, 
+        UsuarioRepository $usuarioRepository, 
+        UserPasswordHasherInterface $passwordHasher
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+    
+        if (!isset($data['oldPassword'], $data['newPassword'])) {
+            return $this->json(['status' => 'Invalid data!'], 400);
+        }
+    
+        $usuario = $usuarioRepository->find($id);
+    
+        if (!$usuario || !$passwordHasher->isPasswordValid($usuario, $data['oldPassword'])) {
+            return $this->json(['status' => 'Invalid user or password!'], 401);
+        }
+    
+        $usuario->setPassword($passwordHasher->hashPassword($usuario, $data['newPassword']));
+        $usuarioRepository->add($usuario);
+    
+        return $this->json(['status' => 'Password changed successfully!'], 200);
+    }
+
+    #[Route('/addfoto', name: 'add_foto', methods: ['POST'])]
+    public function addFoto(Request $request, UsuarioRepository $usuarioRepository): JsonResponse
+    {
+        $usuarioId = $request->request->get('id');
+        $file = $request->files->get('foto');
+
+        if (!$usuarioId || !$file) {
+            return $this->json(['status' => 'Invalid data!'], 400);
+        }
+
+        $usuario = $usuarioRepository->find($usuarioId);
+        if (!$usuario) {
+            return $this->json(['status' => 'Usuario not found!'], 404);
+        }
+
+        $uploadDir = '/var/www/html';
+        $fileExtension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+        $fileName = uniqid() . '.' . $fileExtension;
+
+        // Verificar que el archivo sea una imagen
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($file->getClientMimeType(), $allowedMimeTypes)) {
+            return $this->json(['status' => 'Invalid file type!'], 400);
+        }
+
+        try {
+            $file->move($uploadDir, $fileName);
+        } catch (FileException $e) {
+            return $this->json(['status' => 'File upload error!'], 500);
+        }
+
+        // Solo guarda el nombre del archivo
+        $usuario->setFoto($fileName);
+        $usuarioRepository->add($usuario);
+
+        // Construir la URL de la imagen
+        $imageUrl = sprintf('http://%s/%s', $_SERVER['HTTP_HOST'], $fileName);
+
+        return $this->json(['status' => 'Foto added!', 'imageUrl' => $imageUrl], 201);
+    }
+
+    #[Route('/getFoto/{id}', name: 'get_foto', methods: ['GET'])]
+    public function getFoto(int $id, UsuarioRepository $usuarioRepository): JsonResponse
+    {
+        $usuario = $usuarioRepository->find($id);
+        if (!$usuario) {
+            return $this->json(['status' => 'Usuario not found!'], 404);
+        }
+        $fotoUrl = 'http://3.218.6.79/' . $usuario->getFoto();
+        return $this->json(['fotoUrl' => $fotoUrl], 200);
+    }
 }
