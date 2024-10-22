@@ -320,7 +320,7 @@ class RetoController extends AbstractController
         if (!$usuario) {
             return $this->json(['status' => 'Usuario not found!'], 404);
         }
-        $fotoUrl = 'https://wsabi.duckdns.org/perfiles/' . $usuario->getFoto();
+        $fotoUrl = 'https://wsane.duckdns.org/perfiles/' . $usuario->getFoto();
         return $this->json(['fotoUrl' => $fotoUrl], 200);
     }
 
