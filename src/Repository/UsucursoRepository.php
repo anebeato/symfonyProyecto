@@ -34,15 +34,14 @@ class UsucursoRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function findOneByUsuarioAndCurso(int $usuarioId, int $cursoId): ?Usucurso
+    public function findCursosByAlumnoId(int $alumnoId): array
     {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.id_usuario = :usuarioId')
-            ->andWhere('u.id_curso = :cursoId')
-            ->setParameter('usuarioId', $usuarioId)
-            ->setParameter('cursoId', $cursoId)
+            ->join('u.id_usuario', 'usuario') // Asumimos que 'id_usuario' es la relación en Usucurso
+            ->where('usuario.id = :alumnoId')
+            ->setParameter('alumnoId', $alumnoId)
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getResult();
     }
 
     //    /**

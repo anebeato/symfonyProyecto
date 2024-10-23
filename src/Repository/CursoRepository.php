@@ -29,6 +29,17 @@ class CursoRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
+    public function findCursosSinNotaByAlumnoId(int $alumnoId): array
+    {
+        return $this->createQueryBuilder('c')
+            ->leftJoin('c.usucurso', 'uc')
+            ->where('uc.alumno = :alumnoId')
+            ->andWhere('uc.nota IS NULL')
+            ->setParameter('alumnoId', $alumnoId)
+            ->getQuery()
+            ->getResult();
+    }
+
 
     //    /**
     //     * @return Curso[] Returns an array of Curso objects

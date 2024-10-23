@@ -18,10 +18,16 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-
-
 class RetoController extends AbstractController
 {
+
+    private $usuarioRepository;
+
+    public function __construct(UsuarioRepository $usuarioRepository)
+    {
+        $this->usuarioRepository = $usuarioRepository;
+    }
+
     #[Route('/reto', name: 'app_reto')]
     public function index(): JsonResponse
     {
@@ -212,13 +218,13 @@ class RetoController extends AbstractController
     public function altaAlumno(Request $request, UsuarioRepository $usuarioRepository, UsucursoRepository $usucursoRepository, CursoRepository $cursoRepository, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-
+    
         if (!isset($data['username'], $data['curso_id'])) {
             return $this->json(['status' => 'Invalid data!'], 400);
         }
-
+    
         $usuario = $usuarioRepository->findOneBy(['username' => $data['username']]);
-
+    
         if (!$usuario) {
             $usuario = new Usuario();
             $usuario->setUsername($data['username']);
@@ -226,22 +232,24 @@ class RetoController extends AbstractController
             $usuario->setAdmin(false);
             $usuarioRepository->add($usuario);
         }
-
+    
         $curso = $cursoRepository->find($data['curso_id']);
         if (!$curso) {
             return $this->json(['status' => 'Curso not found!'], 404);
         }
-
+    
         $existingUsucurso = $usucursoRepository->findOneBy(['id_usuario' => $usuario->getId(), 'id_curso' => $curso->getId()]);
+        
         if ($existingUsucurso) {
-            return $this->json(['status' => 'Error: Usuario ya existe una relación con este curso!'], 400);
+            return $this->json(['status' => 'El usuario ya está inscrito en este curso.'], 200);
         }
-
+    
         $usucurso = new Usucurso();
         $usucurso->setIdUsuario($usuario);
         $usucurso->setIdCurso($curso);
+        $usucurso->setNota(null); 
         $usucursoRepository->add($usucurso);
-
+    
         return $this->json(['status' => 'Alumno added to curso!'], 201);
     }
 
@@ -353,5 +361,51 @@ class RetoController extends AbstractController
 
         return $this->json(['status' => 'Alumno removed from curso!'], 200);
     }
-  
+
+    #[Route('/alumnos', name: 'get_alumnos', methods: ['GET'])]
+    public function getAlumnos(): JsonResponse
+    {
+        $usuarios = $this->usuarioRepository->findAll();
+
+        if (!$usuarios) {
+            return $this->json(['message' => 'No courses found'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $usuarioArray = [];
+        foreach ($usuarios as $usuario) {
+            $usuarioArray[] = [
+                'id' => $usuario->getId(),
+                'username' => $usuario->getUsername(),
+            ];
+        }
+
+        return $this->json($usuarioArray);
+    }
+
+    #[Route('/getcursosnonota/{id}', name: 'get_cursos_no_nota', methods: ['GET'])]
+    public function getCursosNoNota(int $id, UsucursoRepository $usucursoRepository): JsonResponse
+    {
+        $usucursos = $usucursoRepository->findCursosByAlumnoId($id);
+
+        if (!$usucursos) {
+            return $this->json(['message' => 'No courses found for the given student ID'], Response::HTTP_NOT_FOUND);
+        }
+
+        $cursosSinNota = array_filter($usucursos, function($usucurso) {
+            return $usucurso->getNota() === null; 
+        });
+
+        $response = [];
+        foreach ($cursosSinNota as $usucurso) {
+            $response[] = [
+                'curso_id' => $usucurso->getIdCurso()->getId(),
+                'curso_nombre' => $usucurso->getIdCurso()->getNombre(),
+            ];
+        }
+
+        return $this->json($response, Response::HTTP_OK);
+    }
+    
+    
+    
 }
