@@ -324,4 +324,35 @@ class RetoController extends AbstractController
         return $this->json(['fotoUrl' => $fotoUrl], 200);
     }
 
+
+    #[Route('/bajaAlumno', name: 'baja_alumno', methods: ['DELETE'])]
+    public function bajaAlumno(Request $request, UsuarioRepository $usuarioRepository, UsucursoRepository $usucursoRepository, CursoRepository $cursoRepository, EntityManagerInterface $entityManager): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['username'], $data['curso_id'])) {
+            return $this->json(['status' => 'Invalid data!'], 400);
+        }
+
+        $usuario = $usuarioRepository->findOneBy(['username' => $data['username']]);
+        if (!$usuario) {
+            return $this->json(['status' => 'Usuario not found!'], 404);
+        }
+
+        $curso = $cursoRepository->find($data['curso_id']);
+        if (!$curso) {
+            return $this->json(['status' => 'Curso not found!'], 404);
+        }
+
+        $usucurso = $usucursoRepository->findOneBy(['id_usuario' => $usuario->getId(), 'id_curso' => $curso->getId()]);
+        if (!$usucurso) {
+            return $this->json(['status' => 'Relation between usuario and curso not found!'], 404);
+        }
+
+        $entityManager->remove($usucurso);
+        $entityManager->flush();
+
+        return $this->json(['status' => 'Alumno removed from curso!'], 200);
+    }
+
+    
 }
