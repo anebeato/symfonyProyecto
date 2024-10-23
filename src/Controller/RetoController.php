@@ -353,6 +353,5 @@ class RetoController extends AbstractController
 
         return $this->json(['status' => 'Alumno removed from curso!'], 200);
     }
-
-    
+  
 }
